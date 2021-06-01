@@ -10,6 +10,8 @@ def dataset_factory(data_dir, name, k=1):
     # get dataset
     if name[:4] == 'heat':
         opt, data, relations = heat(data_dir, '{}.csv'.format(name))
+    elif 'eq_data' in name:
+        opt, data, relations = eq(data_dir, '{}.csv'.format(name))
     else:
         raise ValueError('Non dataset named `{}`.'.format(name))
     # make k hop
@@ -35,5 +37,21 @@ def heat(data_dir, file='heat.csv'):
     data = torch.Tensor(np.genfromtxt(os.path.join(data_dir, file))).view(opt.nt, opt.nx, opt.nd)
     # load relations
     relations = torch.Tensor(np.genfromtxt(os.path.join(data_dir, 'heat_relations.csv')))
+    relations = normalize(relations).unsqueeze(1)
+    return opt, data, relations
+
+# TODO: Separate Event for Test
+def eq(data_dir, file='eq_data.csv'):
+    # dataset configuration
+    opt = DotDict()
+    opt.nt = (20*60*100)
+    opt.nt_train = (opt.nt//2)
+    opt.nx = 3
+    opt.nd = 1
+    opt.periode = opt.nt
+    # loading data
+    data = torch.Tensor(np.genfromtxt(os.path.join(data_dir, file))).view(opt.nt, opt.nx, opt.nd)
+    # load relations
+    relations = torch.Tensor(np.genfromtxt(os.path.join(data_dir,'eq_data_relations.csv')))
     relations = normalize(relations).unsqueeze(1)
     return opt, data, relations
